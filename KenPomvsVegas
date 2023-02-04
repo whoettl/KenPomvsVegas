@@ -1,0 +1,116 @@
+#KENPOM SILLY#
+library(rvest)
+library(tidyverse)
+kenpom <- read_html("https://kenpom.com/")
+Feb1 <- kenpom %>%
+  html_node("tbody") %>%
+  html_table()
+names(Feb1)[names(Feb1) == "X1"] <- "Rank"
+names(Feb1)[names(Feb1) == "X2"] <- "Team"
+names(Feb1)[names(Feb1) == "X5"] <- "EM"
+names(Feb1)[names(Feb1) == "X10"] <- "Tempo"
+Feb1 <- subset(Feb1, select = -c(X3, X4, X7, X9, X11, X12, X13, X14, X15, X16, X17, X18, X19, X20, X21))
+Feb1$Team <- gsub("N.C. State", "N.C. St.", Feb1$Team)
+Feb1$Team <- gsub("St. John's", "Saint Johns", Feb1$Team)
+Feb1$Team <- gsub("Saint Joseph's", "Saint Josephs", Feb1$Team)
+Feb1$Team <- gsub("St. Bonaventure", "Saint Bonaventure", Feb1$Team)
+Feb1$Team <- gsub("Saint Mary's", "Saint Marys", Feb1$Team)
+Feb1$Team <- gsub("Saint Peter's", "Saint Peters", Feb1$Team)
+
+bets <- read_html("https://sportsbook.draftkings.com/leagues/basketball/ncaab")
+betsFeb1 <- bets %>%
+  html_elements(".sportsbook-table__body") %>%
+  html_table()
+betsFeb1 <- bind_rows(betsFeb1)
+betsFeb1$X1 <- gsub("[1234567890:]", "", betsFeb1$X1)
+betsFeb1$X1 <- gsub("AM", "", betsFeb1$X1)
+betsFeb1$X1 <- gsub("PM", "", betsFeb1$X1)
+names(betsFeb1)[names(betsFeb1) == "X1"] <- "Team"
+names(betsFeb1)[names(betsFeb1) == "X2"] <- "Spread"
+names(betsFeb1)[names(betsFeb1) == "X4"] <- "MoneyLine"
+betsFeb1 <- subset(betsFeb1, select = -(X3))
+betsFeb1$Team <- gsub("Pennsylvania", "Penn", betsFeb1$Team)
+betsFeb1$Team <- gsub("UConn", "Connecticut", betsFeb1$Team)
+betsFeb1$Team <- gsub("State", "St.", betsFeb1$Team)
+betsFeb1$Team <- gsub("UIC", "Illinois Chicago", betsFeb1$Team)
+betsFeb1$Team <- gsub("UNCW", "UNC Wilmington", betsFeb1$Team)
+betsFeb1$Team <- gsub("UNCG", "UNC Greensboro", betsFeb1$Team)
+betsFeb1$Team <- gsub("Ole Miss", "Mississippi", betsFeb1$Team)
+betsFeb1$Team <- gsub("UNI", "Northern Iowa", betsFeb1$Team)
+betsFeb1$Team <- gsub("Central Connecticut St.", "Central Connecticut", betsFeb1$Team)
+betsFeb1$Team <- gsub("Gardner-Webb", "Gardner Webb", betsFeb1$Team)
+betsFeb1$Team <- gsub("SFA", "Stephen F. Austin", betsFeb1$Team)
+betsFeb1$Team <- gsub("Saint Francis Brooklyn", "St. Francis NY", betsFeb1$Team)
+betsFeb1$Team <- gsub("Saint Francis PA", "St. Francis PA", betsFeb1$Team)
+betsFeb1$Team <- gsub("Southern Mississippi", "Southern Miss", betsFeb1$Team)
+betsFeb1$Team <- gsub("ULM", "Louisiana Monroe", betsFeb1$Team)
+betsFeb1$Team <- gsub("UMES", "Maryland Eastern Shore", betsFeb1$Team)
+betsFeb1$Team <- gsub("Arkansas-Pine Bluff", "Arkansas Pine Bluff", betsFeb1$Team)
+betsFeb1$Team <- gsub("ETSU", "East Tennessee St.", betsFeb1$Team)
+betsFeb1$Team <- gsub("UT Martin", "Tennessee Martin", betsFeb1$Team)
+betsFeb1$Team <- gsub("Alcorn", "Alcorn St.", betsFeb1$Team)
+betsFeb1$Team <- gsub("Sam Houston", "Sam Houston St.", betsFeb1$Team)
+betsFeb1$Team <- gsub("Southern University", "Southern", betsFeb1$Team)
+betsFeb1$Team <- gsub("FGCU", "Florida Gulf Coast", betsFeb1$Team)
+betsFeb1$Team <- gsub("North Carolina St.", "N.C. St.", betsFeb1$Team)
+betsFeb1$Team <- gsub("UTRGV", "UT Rio Grande Valley", betsFeb1$Team)
+betsFeb1$Team <- gsub("CSUN", "Cal St. Northridge", betsFeb1$Team)
+betsFeb1$Team <- gsub("Kansas City", "UMKC", betsFeb1$Team)
+betsFeb1$Team <- gsub("Queens NC", "Queens", betsFeb1$Team)
+betsFeb1$Team <- gsub("SIUE", "SIU Edwardsville", betsFeb1$Team)
+betsFeb1$Team <- gsub("California Baptist", "Cal Baptist", betsFeb1$Team)
+betsFeb1$Team <- gsub("LMU", "Loyola Marymount", betsFeb1$Team)
+betsFeb1$Team <- gsub("Louisiana-Lafayette", "Louisiana", betsFeb1$Team)
+betsFeb1$Team <- gsub("CSU Bakersfield", "Cal St. Bakersfield", betsFeb1$Team)
+betsFeb1$Team <- gsub("Saint Thomas MN", "St.Thomas", betsFeb1$Team)
+betsFeb1$Team <- gsub("Omaha", "Nebraska Omaha", betsFeb1$Team)
+betsFeb1$Team <- gsub("Prairie View", "Prairie View A&M", betsFeb1$Team)
+betsFeb1$Team <- gsub("Mississippi Valley", "Mississippi Valley St.", betsFeb1$Team)
+betsFeb1$Team <- gsub("Grambling", "Grambling St.", betsFeb1$Team)
+betsFeb1$Team <- gsub("Bethune-Cookman", "Bethune Cookman", betsFeb1$Team)
+betsFeb1$Team <- gsub("Texas A&M-Commerce", "Texas A&M Commerce", betsFeb1$Team)
+betsFeb1$Team <- gsub("McNeese", "McNeese St.", betsFeb1$Team)
+betsFeb1$Team <- gsub("UIW", "Incarnate Word", betsFeb1$Team)
+betsFeb1$Team <- gsub("A&M-Corpus Christi", "Texas A&M Corpus Chris", betsFeb1$Team)
+betsFeb1$Team <- gsub("St.Thomas", "St. Thomas", betsFeb1$Team)
+betsFeb1$Team <- gsub("Mount Saint Marys", "Mount St. Mary's", betsFeb1$Team)
+
+
+
+view(Feb1)
+view(betsFeb1)
+
+February1 <- merge(betsFeb1, Feb1, by = "Team", sort = F)
+
+view(February1)
+
+
+February1 <- February1 %>%
+  mutate(Matchup = row_number())
+
+
+February1$Matchup <- ifelse(February1$Matchup %% 2 == 0, February1$Matchup, February1$Matchup + 1)
+February1$Matchup <- February1$Matchup / 2
+February1$Matchup <- as.numeric(February1$Matchup)
+February1$Rank <- as.numeric(February1$Rank)
+February1 <- arrange(February1, February1$Matchup, February1$Rank)
+view(February1)
+
+for (i in February1[, 7]) {
+  if (February1[i, 7] == February1[i + 1, 7]) {
+    if (February1[i, 2] >= "+") {
+      print(February1[i, 1])
+    } else {
+      print("Normal")
+    }
+  }
+}
+
+write.csv(February1, "/Users/walkeroettl/Documents/Learning R/MeVsKen/Feb1.csv", row.names=FALSE)
+
+
+
+
+
+
+
